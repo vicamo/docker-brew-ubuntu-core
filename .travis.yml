@@ -30,12 +30,6 @@ env:
   - VARIANT=xenial-i386
   - VARIANT=xenial-ppc64el
   - VARIANT=xenial-s390x
-  - VARIANT=zesty-amd64
-  - VARIANT=zesty-arm64
-  - VARIANT=zesty-armhf
-  - VARIANT=zesty-i386
-  - VARIANT=zesty-ppc64el
-  - VARIANT=zesty-s390x
 
 matrix:
   fast_finish: true
@@ -43,7 +37,6 @@ matrix:
   - env: VARIANT=artful-s390x
   - env: VARIANT=bionic-s390x
   - env: VARIANT=xenial-s390x
-  - env: VARIANT=zesty-s390x
 
 branches:
   only:
