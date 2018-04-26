@@ -35,8 +35,6 @@ matrix:
   fast_finish: true
   allow_failures:
   - env: VARIANT=artful-s390x
-  - env: VARIANT=bionic-s390x
-  - env: VARIANT=xenial-s390x
 
 branches:
   only:
