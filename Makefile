@@ -50,6 +50,7 @@ QEMU_ARCH_powerpc := ppc
 QEMU_ARCH_powerpcspe := ppc
 QEMU_ARCH_ppc64el := ppc64le
 QEMU_SUITE_trusty := bionic
+QEMU_SUITE_artful := bionic
 QEMU_SUITE_xenial := bionic
 
 # $(1): suite

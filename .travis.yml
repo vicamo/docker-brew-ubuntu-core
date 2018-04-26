@@ -34,7 +34,6 @@ env:
 matrix:
   fast_finish: true
   allow_failures:
-  - env: VARIANT=artful-s390x
 
 branches:
   only:
