@@ -40,7 +40,7 @@ branches:
   - master
 
 before_install:
-- docker run --rm --privileged vicamo/binfmt-qemu:latest
+- docker run --rm --privileged vicamo/binfmt-qemu:bionic
 - cat /proc/sys/fs/binfmt_misc/qemu-*
 
 script:
