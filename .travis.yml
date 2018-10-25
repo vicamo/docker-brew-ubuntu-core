@@ -7,12 +7,6 @@ env:
   - DOCKER_REPO=ubuntu
   - secure: "BTSuC+Y0IspLOl+CRUwgy8g4DsavDdyF9GOD97YkKy7hkHWF+tR8N3W5wgPMpO2JXhKBY8nmj1p32AlMFu42oGtfZEl25yRBhEkHf8pjB7hdSYs51GFcwblI+jjm4hUAkkAHcbpl6GtG/1JkXqhDl59NykKsYtXAPuAbsP/9uEk="
   matrix:
-  - VARIANT=artful-amd64
-  - VARIANT=artful-arm64
-  - VARIANT=artful-armhf
-  - VARIANT=artful-i386
-  - VARIANT=artful-ppc64el
-  - VARIANT=artful-s390x
   - VARIANT=bionic-amd64
   - VARIANT=bionic-arm64
   - VARIANT=bionic-armhf
