@@ -19,6 +19,12 @@ env:
   - VARIANT=cosmic-i386
   - VARIANT=cosmic-ppc64el
   - VARIANT=cosmic-s390x
+  - VARIANT=disco-amd64
+  - VARIANT=disco-arm64
+  - VARIANT=disco-armhf
+  - VARIANT=disco-i386
+  - VARIANT=disco-ppc64el
+  - VARIANT=disco-s390x
   - VARIANT=trusty-amd64
   - VARIANT=trusty-arm64
   - VARIANT=trusty-armhf
