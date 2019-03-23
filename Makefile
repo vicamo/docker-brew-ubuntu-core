@@ -27,6 +27,7 @@ DQUOTE := "
 
 LATEST := $(shell cat latest)
 ROLLING := $(shell cat rolling)
+DEVEL := $(shell cat devel)
 
 BASE_URL := https://partner-images.canonical.com/core
 WGET_FILES := \
@@ -119,6 +120,7 @@ define enumerate-additional-tags-for
 $(if $(filter $(DEFAULT_ARCH),$(2)),$(1)) \
 $(if $(filter $(LATEST),$(1)),latest-$(2) $(if $(filter $(DEFAULT_ARCH),$(2)),latest)) \
 $(if $(filter $(ROLLING),$(1)),rolling-$(2) $(if $(filter $(DEFAULT_ARCH),$(2)),rolling)) \
+$(if $(filter $(DEVEL),$(1)),devel-$(2) $(if $(filter $(DEFAULT_ARCH),$(2)),devel)) \
 \
 $(eval roottar := $(1)/$(2)/$(call roottar-filename,$(1),$(2))) \
 $(if $(wildcard $(roottar)), \
