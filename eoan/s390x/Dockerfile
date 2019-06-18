@@ -1,60 +1,7 @@
-#!/bin/bash
-set -Eeuo pipefail
-
-cd "$(dirname "$BASH_SOURCE")"
-
-versions=( "$@" )
-if [ ${#versions[@]} -eq 0 ]; then
-	versions=( */ )
-fi
-versions=( "${versions[@]%/}" )
-
-hostArch="$(dpkg --print-architecture)"
-arch="$(cat arch 2>/dev/null || true)"
-: ${arch:=$hostArch}
-
-toVerify=()
-for v in "${versions[@]}"; do
-	thisTarBase="ubuntu-$v-core-cloudimg-$arch"
-	thisTar="$thisTarBase-root.tar.gz"
-	baseUrl="https://partner-images.canonical.com/core/$v"
-	if \
-		wget -q --spider "$baseUrl/current" \
-		&& wget -q --spider "$baseUrl/current/$thisTar" \
-	; then
-		baseUrl+='/current'
-	else
-		# appears to be missing a "current" symlink (or $arch doesn't exist in /current/)
-		# let's enumerate all the directories and try to find one that's satisfactory
-		toAttempt=( $(wget -qO- "$baseUrl/" | awk -F '</?a[^>]*>' '$2 ~ /^[0-9.]+\/$/ { gsub(/\/$/, "", $2); print $2 }' | sort -rn) )
-		current=
-		for attempt in "${toAttempt[@]}"; do
-			if wget -q --spider "$baseUrl/$attempt/$thisTar"; then
-				current="$attempt"
-				break
-			fi
-		done
-		if [ -z "$current" ]; then
-			echo >&2 "warning: cannot find 'current' for $v"
-			echo >&2 "  (checked all dirs under $baseUrl/)"
-			continue
-		fi
-		baseUrl+="/$current"
-		echo "SERIAL=$current" > "$v/build-info.txt" # this will be overwritten momentarily if this directory has one
-	fi
-
-	(
-		cd "$v"
-		wget -qN "$baseUrl/"{{MD5,SHA{1,256}}SUMS{,.gpg},"$thisTarBase.manifest",'unpacked/build-info.txt'} || true
-		wget -N --progress=dot:giga "$baseUrl/$thisTar"
-	)
-
-	cat > "$v/Dockerfile" <<EOF
+# GENERATED FROM Dockerfile.template
 FROM scratch
-ADD $thisTar /
-EOF
-
-	cat >> "$v/Dockerfile" <<'EOF'
+ADD ubuntu-eoan-core-cloudimg-s390x-root.tar.gz /
+ADD qemu-s390x-static /usr/bin/qemu-s390x-static
 
 # a few minor docker-specific tweaks
 # see https://github.com/docker/docker/blob/9a9fc01af8fb5d98b8eec0740716226fadb3735c/contrib/mkimage/debootstrap
@@ -98,9 +45,3 @@ RUN mkdir -p /run/systemd && echo 'docker' > /run/systemd/container
 
 # overwrite this with 'CMD []' in a dependent Dockerfile
 CMD ["/bin/bash"]
-EOF
-
-	toVerify+=( "$v" )
-done
-
-( set -x; ./verify.sh "${toVerify[@]}" )

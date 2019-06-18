@@ -1,6 +1,6 @@
 # GENERATED FROM Dockerfile.template
 FROM scratch
-ADD ubuntu-trusty-core-cloudimg-amd64-root.tar.gz /
+ADD ubuntu-eoan-core-cloudimg-amd64-root.tar.gz /
 
 
 # a few minor docker-specific tweaks

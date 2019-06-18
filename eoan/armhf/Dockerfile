@@ -1,6 +1,6 @@
 # GENERATED FROM Dockerfile.template
 FROM scratch
-ADD ubuntu-trusty-core-cloudimg-armhf-root.tar.gz /
+ADD ubuntu-eoan-core-cloudimg-armhf-root.tar.gz /
 ADD qemu-arm-static /usr/bin/qemu-arm-static
 
 # a few minor docker-specific tweaks

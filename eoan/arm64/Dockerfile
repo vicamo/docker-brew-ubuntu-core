@@ -1,7 +1,7 @@
 # GENERATED FROM Dockerfile.template
 FROM scratch
-ADD ubuntu-trusty-core-cloudimg-ppc64el-root.tar.gz /
-ADD qemu-ppc64le-static /usr/bin/qemu-ppc64le-static
+ADD ubuntu-eoan-core-cloudimg-arm64-root.tar.gz /
+ADD qemu-aarch64-static /usr/bin/qemu-aarch64-static
 
 # a few minor docker-specific tweaks
 # see https://github.com/docker/docker/blob/9a9fc01af8fb5d98b8eec0740716226fadb3735c/contrib/mkimage/debootstrap
