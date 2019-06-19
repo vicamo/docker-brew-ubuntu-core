@@ -5,7 +5,7 @@ services:
 env:
   global:
   - DOCKER_REPO=ubuntu
-  - secure: "BTSuC+Y0IspLOl+CRUwgy8g4DsavDdyF9GOD97YkKy7hkHWF+tR8N3W5wgPMpO2JXhKBY8nmj1p32AlMFu42oGtfZEl25yRBhEkHf8pjB7hdSYs51GFcwblI+jjm4hUAkkAHcbpl6GtG/1JkXqhDl59NykKsYtXAPuAbsP/9uEk="
+  - secure: "FkyBotzqHDBZGAvmgZ5D29nBVPUHYoVb4sz7nKtRFmTYoUDizedRgSU68AI87IsQCe50kilusilYSH0sufRvhWEOcGmHSvbpJ1OTdvudkhiIqecfxXZTBe0vL0GrsT73E3EDJfXoE8LNZIjr99dRpH2FJUhuJg8Yoqu8p4h78Js="
   matrix:
   - VARIANT=bionic-amd64
   - VARIANT=bionic-arm64
