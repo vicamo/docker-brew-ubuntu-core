@@ -31,6 +31,12 @@ env:
   - VARIANT=eoan-i386
   - VARIANT=eoan-ppc64el
   - VARIANT=eoan-s390x
+  - VARIANT=focal-amd64
+  - VARIANT=focal-arm64
+  - VARIANT=focal-armhf
+  - VARIANT=focal-i386
+  - VARIANT=focal-ppc64el
+  - VARIANT=focal-s390x
   - VARIANT=xenial-amd64
   - VARIANT=xenial-arm64
   - VARIANT=xenial-armhf
@@ -41,6 +47,8 @@ env:
 matrix:
   fast_finish: true
   allow_failures:
+  # https://github.com/vicamo/docker-brew-ubuntu-core/issues/25
+  - env: VARIANT=focal-s390x
 
 branches:
   only:
