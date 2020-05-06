@@ -1,6 +1,6 @@
 # GENERATED FROM Dockerfile.template
 FROM scratch
-ADD ubuntu-disco-core-cloudimg-ppc64el-root.tar.gz /
+ADD ubuntu-trusty-core-cloudimg-ppc64el-root.tar.gz /
 ADD qemu-ppc64le-static /usr/bin/qemu-ppc64le-static
 
 # a few minor docker-specific tweaks

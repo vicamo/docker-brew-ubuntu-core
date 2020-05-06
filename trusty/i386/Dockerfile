@@ -1,6 +1,6 @@
 # GENERATED FROM Dockerfile.template
 FROM scratch
-ADD ubuntu-focal-core-cloudimg-i386-root.tar.gz /
+ADD ubuntu-trusty-core-cloudimg-i386-root.tar.gz /
 
 
 # a few minor docker-specific tweaks
