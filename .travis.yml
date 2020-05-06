@@ -37,6 +37,11 @@ env:
   - VARIANT=focal-i386
   - VARIANT=focal-ppc64el
   - VARIANT=focal-s390x
+  - VARIANT=trusty-amd64
+  - VARIANT=trusty-arm64
+  - VARIANT=trusty-armhf
+  - VARIANT=trusty-i386
+  - VARIANT=trusty-ppc64el
   - VARIANT=xenial-amd64
   - VARIANT=xenial-arm64
   - VARIANT=xenial-armhf
