@@ -34,7 +34,6 @@ env:
   - VARIANT=focal-amd64
   - VARIANT=focal-arm64
   - VARIANT=focal-armhf
-  - VARIANT=focal-i386
   - VARIANT=focal-ppc64el
   - VARIANT=focal-s390x
   - VARIANT=trusty-amd64
