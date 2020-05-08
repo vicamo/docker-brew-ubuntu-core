@@ -24,6 +24,11 @@ env:
   - VARIANT=focal-armhf
   - VARIANT=focal-ppc64el
   - VARIANT=focal-s390x
+  - VARIANT=groovy-amd64
+  - VARIANT=groovy-arm64
+  - VARIANT=groovy-armhf
+  - VARIANT=groovy-ppc64el
+  - VARIANT=groovy-s390x
   - VARIANT=trusty-amd64
   - VARIANT=trusty-arm64
   - VARIANT=trusty-armhf
