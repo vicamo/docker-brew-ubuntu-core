@@ -79,9 +79,7 @@ $(GNUPGHOME):
 	@mkdir -p $@
 	@chmod 700 $@
 	$(hide) export GNUPGHOME="$(GNUPGHOME)"; \
-	gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$(GPG_FINGERPRINT)" \
-	  || gpg --keyserver pgp.mit.edu --recv-keys "$(GPG_FINGERPRINT)" \
-	  || gpg --keyserver keyserver.pgp.com --recv-keys "$(GPG_FINGERPRINT)"
+	gpg --keyserver keyserver.ubuntu.com --recv-keys "$(GPG_FINGERPRINT)"
 
 endif
 
