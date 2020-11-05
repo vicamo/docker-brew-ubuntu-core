@@ -1,37 +1,7 @@
-#!/bin/bash
-set -Eeuo pipefail
-
-cd "$(dirname "$BASH_SOURCE")"
-
-versions=( "$@" )
-if [ ${#versions[@]} -eq 0 ]; then
-	versions=( */ )
-fi
-versions=( "${versions[@]%/}" )
-
-arch="$(< arch)"
-
-toVerify=()
-for v in "${versions[@]}"; do
-	if ! grep -qE "^$arch\$" "$v/arches"; then
-		continue
-	fi
-
-	thisTarBase="ubuntu-$v-core-cloudimg-$arch"
-	thisTar="$thisTarBase-root.tar.gz"
-	baseUrl="https://partner-images.canonical.com/core/$v/current"
-
-	(
-		cd "$v"
-		wget -qN "$baseUrl/"{{MD5,SHA{1,256}}SUMS{,.gpg},"$thisTarBase.manifest",'unpacked/build-info.txt'}
-		wget -N --progress=dot:giga "$baseUrl/$thisTar"
-	)
-
-	cat > "$v/Dockerfile" <<EOF
+# GENERATED FROM Dockerfile.template
 FROM scratch
-ADD $thisTar /
-EOF
-	cat >> "$v/Dockerfile" <<'EOF'
+ADD ubuntu-hirsute-core-cloudimg-armhf-root.tar.gz /
+ADD qemu-arm-static /usr/bin/qemu-arm-static
 
 # a few minor docker-specific tweaks
 # see https://github.com/docker/docker/blob/9a9fc01af8fb5d98b8eec0740716226fadb3735c/contrib/mkimage/debootstrap
@@ -63,37 +33,15 @@ RUN set -xe \
 	\
 # https://github.com/docker/docker/blob/9a9fc01af8fb5d98b8eec0740716226fadb3735c/contrib/mkimage/debootstrap#L134-L151
 	&& echo 'Apt::AutoRemove::SuggestsImportant "false";' > /etc/apt/apt.conf.d/docker-autoremove-suggests
-EOF
-
-	if [ "$v" = 'xenial' ]; then
-		cat >> "$v/Dockerfile" <<'EOF'
 
 # delete all the apt list files since they're big and get stale quickly
 RUN rm -rf /var/lib/apt/lists/*
 # this forces "apt-get update" in dependent images, which is also good
 # (see also https://bugs.launchpad.net/cloud-images/+bug/1699913)
-EOF
-	else
-		cat >> "$v/Dockerfile" <<'EOF'
-
-# verify that the APT lists files do not exist
-RUN [ -z "$(apt-get indextargets)" ]
-# (see https://bugs.launchpad.net/cloud-images/+bug/1699913)
-EOF
-	fi
-
-	cat >> "$v/Dockerfile" <<'EOF'
 
 # make systemd-detect-virt return "docker"
 # See: https://github.com/systemd/systemd/blob/aa0c34279ee40bce2f9681b496922dedbadfca19/src/basic/virt.c#L434
 RUN mkdir -p /run/systemd && echo 'docker' > /run/systemd/container
 
+# overwrite this with 'CMD []' in a dependent Dockerfile
 CMD ["/bin/bash"]
-EOF
-
-	toVerify+=( "$v" )
-done
-
-if [ "${#toVerify[@]}" -gt 0 ]; then
-	( set -x; ./verify.sh "${toVerify[@]}" )
-fi

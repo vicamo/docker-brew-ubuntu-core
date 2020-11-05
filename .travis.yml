@@ -23,6 +23,11 @@ env:
   - VARIANT=groovy-armhf
   - VARIANT=groovy-ppc64el
   - VARIANT=groovy-s390x
+  - VARIANT=hirsute-amd64
+  - VARIANT=hirsute-arm64
+  - VARIANT=hirsute-armhf
+  - VARIANT=hirsute-ppc64el
+  - VARIANT=hirsute-s390x
   - VARIANT=trusty-amd64
   - VARIANT=trusty-arm64
   - VARIANT=trusty-armhf
