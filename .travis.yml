@@ -43,8 +43,6 @@ env:
 matrix:
   fast_finish: true
   allow_failures:
-  # https://github.com/vicamo/docker-brew-ubuntu-core/issues/25
-  - env: VARIANT=focal-s390x
   # https://github.com/vicamo/docker-brew-ubuntu-core/issues/32
   - env: VARIANT=hirsute-arm64
   # https://github.com/vicamo/docker-brew-ubuntu-core/issues/32
