@@ -1,1 +1,6 @@
+*.manifest
+*.tar.*
+MD5SUMS*
+SHA*SUMS*
+build-info.txt
 qemu-*-static

@@ -5,7 +5,7 @@ cd "$(dirname "$BASH_SOURCE")"
 
 versions=( "$@" )
 if [ ${#versions[@]} -eq 0 ]; then
-	versions=( */ )
+	versions=( */*/ )
 fi
 versions=( "${versions[@]%/}" )
 
@@ -22,15 +22,16 @@ else
 fi
 
 hostArch="$(dpkg --print-architecture)"
-arch="$(cat arch 2>/dev/null || true)"
-: ${arch:=$hostArch}
 
 for v in "${versions[@]}"; do
-	thisTarBase="ubuntu-$v-core-cloudimg-$arch"
+	arch=${v#*/}
+	codename=${v%/*}
+
+	thisTarBase="ubuntu-$codename-core-cloudimg-$arch"
 	thisTar="$thisTarBase-root.tar.gz"
-	baseUrl="https://partner-images.canonical.com/core/$v"
+	baseUrl="https://partner-images.canonical.com/core/$codename"
 	for sums in sha256 sha1 md5; do
-		sumsFile="$v/${sums^^}SUMS" # "SHA256SUMS"
+		sumsFile="$codename/${sums^^}SUMS" # "SHA256SUMS"
 		sumCmd="${sums}sum" # "sha256sum"
 		if [ "$gpgFingerprint" ]; then
 			if [ ! -f "$sumsFile.gpg" ]; then

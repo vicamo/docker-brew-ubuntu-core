@@ -5,32 +5,76 @@ cd "$(dirname "$BASH_SOURCE")"
 
 versions=( "$@" )
 if [ ${#versions[@]} -eq 0 ]; then
-	versions=( */ )
+	versions=( */*/ )
 fi
 versions=( "${versions[@]%/}" )
 
-arch="$(< arch)"
+hostArch="$(dpkg --print-architecture)"
+
+qemuNativeArches=(amd64-i386 arm-armel armel-arm arm-armhf armhf-arm armel-armhf armhf-armel i386-amd64 powerpc-ppc64 ppc64-powerpc sparc-sparc64 sparc64-sparc s390-s390x s390x-s390)
+for arch in alpha arm armeb i386 m68k mips mipsel mips64el ppc64 sh4 sh4eb sparc sparc64 s390x; do
+	eval "qemuArch_$arch=$arch"
+done
+qemuArch_amd64=x86_64
+qemuArch_armel=arm
+qemuArch_armhf=arm
+qemuArch_arm64=aarch64
+qemuArch_lpia=i386
+qemuArch_powerpc=ppc
+qemuArch_powerpcspe=ppc
+qemuArch_ppc64el=ppc64le
+qemuSuite_trusty=bionic
+qemuSuite_artful=bionic
+qemuSuite_xenial=bionic
 
 toVerify=()
 for v in "${versions[@]}"; do
-	if ! grep -qE "^$arch\$" "$v/arches"; then
+	arch=${v#*/}
+	codename=${v%/*}
+
+	if ! grep -qE "^$arch\$" "$codename/arches"; then
 		continue
 	fi
 
-	thisTarBase="ubuntu-$v-core-cloudimg-$arch"
+	thisTarBase="ubuntu-$codename-core-cloudimg-$arch"
 	thisTar="$thisTarBase-root.tar.gz"
-	baseUrl="https://partner-images.canonical.com/core/$v/current"
+	baseUrl="https://partner-images.canonical.com/core/$codename/current"
 
-	(
-		cd "$v"
-		wget -qN "$baseUrl/"{{MD5,SHA{1,256}}SUMS{,.gpg},"$thisTarBase.manifest",'unpacked/build-info.txt'}
-		wget -N --progress=dot:giga "$baseUrl/$thisTar"
-	)
+	wget -c -qN -P "$codename" "$baseUrl/"{{MD5,SHA{1,256}}SUMS{,.gpg},'unpacked/build-info.txt'}
+	wget -c -qN -P "$v" "$baseUrl/$thisTarBase.manifest"
+	wget -c -N -P "$v" --progress=dot:giga "$baseUrl/$thisTar"
 
-	cat > "$v/Dockerfile" <<EOF
+	echo -n > "$v/Dockerfile"
+
+	qemuArch=
+	qemuSuite=
+	if [[ ! " $hostArch-$hostArch ${qemuNativeArches[*]} " =~ $hostArch-$arch ]]; then
+		qemuArchVar="qemuArch_$arch"
+		qemuArch="${!qemuArchVar}"
+		qemuSuiteVar="qemuSuite_$codename"
+		qemuSuite="${!qemuSuiteVar:-$codename}"
+
+		cat >> "$v/Dockerfile" <<EOF
+FROM ubuntu:$qemuSuite AS qemu
+
+RUN apt-get update --quiet \
+	&& apt-get install --no-install-recommends --yes \
+		qemu-user-static
+
+EOF
+	fi
+
+	cat >> "$v/Dockerfile" <<EOF
 FROM scratch
 ADD $thisTar /
 EOF
+
+	if [ -n "$qemuArch" ]; then
+		cat >> "$v/Dockerfile" <<EOF
+COPY --from=qemu /usr/bin/qemu-${qemuArch}-static /usr/bin
+EOF
+	fi
+
 	cat >> "$v/Dockerfile" <<'EOF'
 
 # a few minor docker-specific tweaks
@@ -65,7 +109,7 @@ RUN set -xe \
 	&& echo 'Apt::AutoRemove::SuggestsImportant "false";' > /etc/apt/apt.conf.d/docker-autoremove-suggests
 EOF
 
-	if [ "$v" = 'xenial' ]; then
+	if [ "$codename" = 'xenial' ]; then
 		cat >> "$v/Dockerfile" <<'EOF'
 
 # delete all the apt list files since they're big and get stale quickly
