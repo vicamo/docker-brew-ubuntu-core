@@ -1,3 +1,4 @@
+dist: focal
 sudo: required
 services:
 - docker
@@ -7,68 +8,83 @@ env:
   - DOCKER_REPO=ubuntu
   - secure: "FkyBotzqHDBZGAvmgZ5D29nBVPUHYoVb4sz7nKtRFmTYoUDizedRgSU68AI87IsQCe50kilusilYSH0sufRvhWEOcGmHSvbpJ1OTdvudkhiIqecfxXZTBe0vL0GrsT73E3EDJfXoE8LNZIjr99dRpH2FJUhuJg8Yoqu8p4h78Js="
   matrix:
-  - VARIANT=bionic-amd64
-  - VARIANT=bionic-arm64
-  - VARIANT=bionic-armhf
-  - VARIANT=bionic-i386
-  - VARIANT=bionic-ppc64el
-  - VARIANT=bionic-s390x
-  - VARIANT=focal-amd64
-  - VARIANT=focal-arm64
-  - VARIANT=focal-armhf
-  - VARIANT=focal-ppc64el
-  - VARIANT=focal-s390x
-  - VARIANT=groovy-amd64
-  - VARIANT=groovy-arm64
-  - VARIANT=groovy-armhf
-  - VARIANT=groovy-ppc64el
-  - VARIANT=groovy-s390x
-  - VARIANT=hirsute-amd64
-  - VARIANT=hirsute-arm64
-  - VARIANT=hirsute-armhf
-  - VARIANT=hirsute-ppc64el
-  - VARIANT=hirsute-s390x
-  - VARIANT=trusty-amd64
-  - VARIANT=trusty-arm64
-  - VARIANT=trusty-armhf
-  - VARIANT=trusty-i386
-  - VARIANT=trusty-ppc64el
-  - VARIANT=xenial-amd64
-  - VARIANT=xenial-arm64
-  - VARIANT=xenial-armhf
-  - VARIANT=xenial-i386
-  - VARIANT=xenial-ppc64el
-  - VARIANT=xenial-s390x
+  - JOB_CODENAME=bionic JOB_ARCH=amd64
+  - JOB_CODENAME=bionic JOB_ARCH=arm64
+  - JOB_CODENAME=bionic JOB_ARCH=armhf
+  - JOB_CODENAME=bionic JOB_ARCH=i386
+  - JOB_CODENAME=bionic JOB_ARCH=ppc64el
+  - JOB_CODENAME=bionic JOB_ARCH=s390x
+  - JOB_CODENAME=focal JOB_ARCH=amd64
+  - JOB_CODENAME=focal JOB_ARCH=arm64
+  - JOB_CODENAME=focal JOB_ARCH=armhf
+  - JOB_CODENAME=focal JOB_ARCH=ppc64el
+  - JOB_CODENAME=focal JOB_ARCH=s390x
+  - JOB_CODENAME=groovy JOB_ARCH=amd64
+  - JOB_CODENAME=groovy JOB_ARCH=arm64
+  - JOB_CODENAME=groovy JOB_ARCH=armhf
+  - JOB_CODENAME=groovy JOB_ARCH=ppc64el
+  - JOB_CODENAME=groovy JOB_ARCH=s390x
+  - JOB_CODENAME=hirsute JOB_ARCH=amd64
+  - JOB_CODENAME=hirsute JOB_ARCH=arm64
+  - JOB_CODENAME=hirsute JOB_ARCH=armhf
+  - JOB_CODENAME=hirsute JOB_ARCH=ppc64el
+  - JOB_CODENAME=hirsute JOB_ARCH=s390x
+  - JOB_CODENAME=trusty JOB_ARCH=amd64
+  - JOB_CODENAME=trusty JOB_ARCH=arm64
+  - JOB_CODENAME=trusty JOB_ARCH=armhf
+  - JOB_CODENAME=trusty JOB_ARCH=i386
+  - JOB_CODENAME=trusty JOB_ARCH=ppc64el
+  - JOB_CODENAME=xenial JOB_ARCH=amd64
+  - JOB_CODENAME=xenial JOB_ARCH=arm64
+  - JOB_CODENAME=xenial JOB_ARCH=armhf
+  - JOB_CODENAME=xenial JOB_ARCH=i386
+  - JOB_CODENAME=xenial JOB_ARCH=ppc64el
+  - JOB_CODENAME=xenial JOB_ARCH=s390x
 
 matrix:
   fast_finish: true
   allow_failures:
   # https://github.com/vicamo/docker-brew-ubuntu-core/issues/32
-  - env: VARIANT=hirsute-arm64
-  # https://github.com/vicamo/docker-brew-ubuntu-core/issues/32
-  - env: VARIANT=hirsute-armhf
-  # https://github.com/vicamo/docker-brew-ubuntu-core/issues/32
-  - env: VARIANT=hirsute-ppc64el
-  # https://github.com/vicamo/docker-brew-ubuntu-core/issues/32
-  - env: VARIANT=hirsute-s390x
+  - env: JOB_CODENAME=hirsute JOB_ARCH=amd64
 
 branches:
   only:
   - master
 
 before_install:
-- docker run --rm --privileged vicamo/binfmt-qemu:bionic
+- docker run --rm --privileged vicamo/binfmt-qemu:focal
 - cat /proc/sys/fs/binfmt_misc/qemu-*
 
+- ./update.sh "${JOB_CODENAME}/${JOB_ARCH}"
+- test -z "$(git status -s)" || false
+
 script:
-- echo "${DOCKER_USER}/${DOCKER_REPO}" > repo
-- make V=1 -j $(nproc) $VARIANT
-- docker images | grep ^${DOCKER_USER}/${DOCKER_REPO} | awk '{print $1 ":" $2}'
+- docker build -t repo:tag "${JOB_CODENAME}/${JOB_ARCH}"
+- docker run -it --rm repo:tag apt-get update --quiet
+
+- aliases="${JOB_CODENAME}"
+- for variant in latest rolling devel; do
+    if [ "${JOB_CODENAME}" = "$(< ${variant})" ]; then
+      aliases="${aliases} ${variant}";
+    fi;
+  done
+- version=$(wget -q -O - "http://archive.ubuntu.com/ubuntu/dists/${JOB_CODENAME}/Release" | awk '/^Version:/ {print $2}');
+  aliases="${aliases} ${version}"
+- for alias in ${aliases}; do
+    docker tag repo:tag "${DOCKER_USER}/${DOCKER_REPO}:${alias}-${JOB_ARCH}";
+    if [ "${JOB_ARCH}" = "amd64" ]; then
+      docker tag repo:tag "${DOCKER_USER}/${DOCKER_REPO}:${alias}";
+    fi;
+    if [ "${alias}" = "latest" ]; then
+      docker tag repo:tag "${DOCKER_USER}/${DOCKER_REPO}:${JOB_ARCH}";
+    fi;
+  done
+- docker images --filter=reference="${DOCKER_USER}/${DOCKER_REPO}:*" --format="{{.Repository}}:{{.Tag}}"
 
 after_success:
 - if [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then
     docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}";
-    for image in $(docker images | grep ^${DOCKER_USER}/${DOCKER_REPO} | awk '{print $1 ":" $2}'); do
+    for image in $(docker images --filter=reference="${DOCKER_USER}/${DOCKER_REPO}:*" --format="{{.Repository}}:{{.Tag}}"); do
       docker push $image;
     done
   fi

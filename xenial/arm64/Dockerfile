@@ -1,7 +1,10 @@
-# GENERATED FROM Dockerfile.template
+FROM ubuntu:bionic AS qemu
+
+RUN apt-get update --quiet 	&& apt-get install --no-install-recommends --yes 		qemu-user-static
+
 FROM scratch
 ADD ubuntu-xenial-core-cloudimg-arm64-root.tar.gz /
-ADD qemu-aarch64-static /usr/bin/qemu-aarch64-static
+COPY --from=qemu /usr/bin/qemu-aarch64-static /usr/bin
 
 # a few minor docker-specific tweaks
 # see https://github.com/docker/docker/blob/9a9fc01af8fb5d98b8eec0740716226fadb3735c/contrib/mkimage/debootstrap
@@ -43,5 +46,4 @@ RUN rm -rf /var/lib/apt/lists/*
 # See: https://github.com/systemd/systemd/blob/aa0c34279ee40bce2f9681b496922dedbadfca19/src/basic/virt.c#L434
 RUN mkdir -p /run/systemd && echo 'docker' > /run/systemd/container
 
-# overwrite this with 'CMD []' in a dependent Dockerfile
 CMD ["/bin/bash"]
