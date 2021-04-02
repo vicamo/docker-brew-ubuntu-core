@@ -1,3 +1,4 @@
+dist: focal
 sudo: required
 services:
 - docker
@@ -45,21 +46,13 @@ matrix:
   allow_failures:
   # https://github.com/vicamo/docker-brew-ubuntu-core/issues/32
   - env: JOB_CODENAME=hirsute JOB_ARCH=amd64
-  # https://github.com/vicamo/docker-brew-ubuntu-core/issues/32
-  - env: JOB_CODENAME=hirsute JOB_ARCH=arm64
-  # https://github.com/vicamo/docker-brew-ubuntu-core/issues/32
-  - env: JOB_CODENAME=hirsute JOB_ARCH=armhf
-  # https://github.com/vicamo/docker-brew-ubuntu-core/issues/32
-  - env: JOB_CODENAME=hirsute JOB_ARCH=ppc64el
-  # https://github.com/vicamo/docker-brew-ubuntu-core/issues/32
-  - env: JOB_CODENAME=hirsute JOB_ARCH=s390x
 
 branches:
   only:
   - master
 
 before_install:
-- docker run --rm --privileged vicamo/binfmt-qemu:bionic
+- docker run --rm --privileged vicamo/binfmt-qemu:focal
 - cat /proc/sys/fs/binfmt_misc/qemu-*
 
 - ./update.sh "${JOB_CODENAME}/${JOB_ARCH}"
