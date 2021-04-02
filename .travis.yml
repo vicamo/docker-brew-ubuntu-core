@@ -44,6 +44,8 @@ matrix:
   fast_finish: true
   allow_failures:
   # https://github.com/vicamo/docker-brew-ubuntu-core/issues/32
+  - env: JOB_CODENAME=hirsute JOB_ARCH=amd64
+  # https://github.com/vicamo/docker-brew-ubuntu-core/issues/32
   - env: JOB_CODENAME=hirsute JOB_ARCH=arm64
   # https://github.com/vicamo/docker-brew-ubuntu-core/issues/32
   - env: JOB_CODENAME=hirsute JOB_ARCH=armhf
@@ -65,6 +67,7 @@ before_install:
 
 script:
 - docker build -t repo:tag "${JOB_CODENAME}/${JOB_ARCH}"
+- docker run -it --rm repo:tag apt-get update --quiet
 
 - aliases="${JOB_CODENAME}"
 - for variant in latest rolling devel; do
